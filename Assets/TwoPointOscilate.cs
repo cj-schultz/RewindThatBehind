@@ -7,6 +7,8 @@ public class TwoPointOscilate : MonoBehaviour
     public Transform pointTwo;
     public float oscillateSpeed = 5;
 
+    public float forceDamper = 2;
+
     private bool oscillating;
 
     private Vector3 originalPosition;
@@ -63,7 +65,10 @@ public class TwoPointOscilate : MonoBehaviour
         {
             GetComponent<Rigidbody>().useGravity = true;
 
-            GetComponent<Rigidbody>().AddForceAtPosition(collision.relativeVelocity, collision.contacts[0].point, ForceMode.Impulse);
+            if(collision.rigidbody.GetComponent<Rigidbody>().isKinematic)
+            {                
+                GetComponent<Rigidbody>().AddForceAtPosition(collision.relativeVelocity / forceDamper, collision.contacts[0].point, ForceMode.Impulse);
+            }            
 
             oscillating = false;
         }        

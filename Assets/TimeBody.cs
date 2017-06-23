@@ -14,8 +14,7 @@ public class TimeBody : MonoBehaviour
     public MeshRenderer[] meshesToChange;
 
     private bool isRewinding = false;
-    
-    [SerializeField]
+        
     private List<PointInTime> pointsInTime;
 
     // Index of point in time -> how many timesteps it stays in this position/rotation
@@ -167,19 +166,22 @@ public class TimeBody : MonoBehaviour
     {        
         if(rewindable)
         {
-            isRewinding = false;
-            rb.isKinematic = false;
-
-            if (pointsInTime.Count > 0)
-            {
-                PointInTime pointInTime = pointsInTime[IndexOfMostRecentPointInTime];
-                SetObjectToPointInTime(pointInTime);
-            }
-
             for (int i = 0; i < meshesToChange.Length; i++)
             {
                 meshesToChange[i].material = originalMaterial;
             }
+
+            if(isRewinding)
+            {
+                isRewinding = false;
+                rb.isKinematic = false;
+
+                if (pointsInTime.Count > 0)
+                {
+                    PointInTime pointInTime = pointsInTime[IndexOfMostRecentPointInTime];
+                    SetObjectToPointInTime(pointInTime);
+                }
+            }                        
         }        
     }   
     
