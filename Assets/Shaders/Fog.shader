@@ -41,7 +41,7 @@
 		{
 			UNITY_INITIALIZE_OUTPUT(Input, data);
 			float4 pos = mul(unity_ObjectToWorld, v.vertex);
-			data.fog = saturate((_FogStart - pos.y) / (_FogStart - _FogEnd));
+			data.fog = saturate((_FogStart - v.vertex.y) / (_FogStart - _FogEnd));
 		}
 
 		void mycolor(Input IN, SurfaceOutputStandard o, inout fixed4 color)
