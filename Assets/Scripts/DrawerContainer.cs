@@ -11,42 +11,50 @@ public class DrawerContainer : MonoBehaviour
     private Dictionary<GameObject, Shader> itemsInDrawer;
 
     void Awake()
-    {
-        // Make this the scale of the drawer length
-        transform.localScale = new Vector3(drawerBottom.localScale.x, transform.localScale.y, transform.localScale.z);
-        transform.position = new Vector3(transform.position.x, transform.position.y, drawerBottom.position.z);
-
+    {        
         itemsInDrawer = new Dictionary<GameObject, Shader>();
     }
 
     void OnTriggerEnter(Collider other)
     {                
-        if (other.gameObject.layer != LayerMask.NameToLayer("IgnorePortal"))
+        if (other.gameObject.layer != LayerMask.NameToLayer("IgnorePortal") && other.GetComponent<DrawerItemInPortal>() == null)
         {
-            Debug.Log(other.gameObject + " Enter");
-
             // It shouldn't already be in the dictionary
-            Assert.IsTrue(!itemsInDrawer.ContainsKey(other.gameObject));            
+            Assert.IsTrue(!itemsInDrawer.ContainsKey(other.gameObject));
+
+            MeshRenderer otherMesh = other.GetComponent<MeshRenderer>();
 
             // Save the objects original material and then set it to the drawer cutoff
             itemsInDrawer.Add(other.gameObject, other.GetComponent<MeshRenderer>().material.shader);
-            other.GetComponent<MeshRenderer>().material.shader = Shader.Find("Custom/DrawerCutoff");            
+            otherMesh.material.shader = Shader.Find("Custom/DrawerCutoff");
+
+            // Disable shadows on the mesh
+            otherMesh.receiveShadows = false;
+            otherMesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+            // @NOTE: Parenting is a cheap solution to keeping the objects in the container when occluded
+            other.transform.SetParent(transform);
         }        
     }
 
     void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.layer != LayerMask.NameToLayer("IgnorePortal"))
-        {
-            Debug.Log(other.gameObject + " Exit");
-
+        if (other.gameObject.layer != LayerMask.NameToLayer("IgnorePortal") && other.GetComponent<DrawerItemInPortal>() == null)
+        {            
             // It should be in the dictionary
-            Assert.IsTrue(itemsInDrawer.ContainsKey(other.gameObject));         
+            Assert.IsTrue(itemsInDrawer.ContainsKey(other.gameObject));
+
+            MeshRenderer otherMesh = other.GetComponent<MeshRenderer>();
 
             // Set the object back to its original material
-            other.GetComponent<MeshRenderer>().material.shader = itemsInDrawer[other.gameObject];
+            otherMesh.material.shader = itemsInDrawer[other.gameObject];
             itemsInDrawer.Remove(other.gameObject);
-                            
+
+            // Enable shadows on the mesh
+            otherMesh.receiveShadows = true;
+            otherMesh.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+
+            other.transform.SetParent(null);            
         }
     }
 }
